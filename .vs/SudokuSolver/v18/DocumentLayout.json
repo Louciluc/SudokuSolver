@@ -22,8 +22,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{c6f34f0d-7ae5-4f3a-be61-fe0c21ae9eb8}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -54,9 +58,9 @@
               "Title": "Program.cs",
               "DocumentMoniker": "I:\\OneDrive\\Programmieren\\VS Projekte\\SudokuSolver\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "I:\\OneDrive\\Programmieren\\VS Projekte\\SudokuSolver\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAKYAAAAAAAAAAAAAAD8CAAAAAAAAAAAAAA==",
+              "ToolTip": "I:\\OneDrive\\Programmieren\\VS Projekte\\SudokuSolver\\Program.cs*",
+              "RelativeToolTip": "Program.cs*",
+              "ViewState": "AgIAAKYAAAAAAAAAAAAAALAAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-11T12:59:48.143Z",
               "EditorCaption": ""
