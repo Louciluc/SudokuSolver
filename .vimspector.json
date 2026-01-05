@@ -1,0 +1,20 @@
+ {
+   "configurations": {
+     "attach": {
+       "adapter": "netcoredbg",
+       "configuration": {
+         "request": "attach",
+         "processId": "${pid}"
+       }
+     },
+     "launch": {
+       "adapter": "netcoredbg",
+       "configuration": {
+         "request": "launch",
+         "program": "I:/OneDrive/Programmieren/VS Projekte/SudokuSolver/bin/Debug/net8.0/SudokuSolver.dll",
+         "args": [],
+         "stopAtEntry": false
+       }
+     }
+   }
+ }
