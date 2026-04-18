@@ -1,0 +1,20 @@
+# <- Comment
+# all numbers must be sperated by ' '
+# the end of one box must be '|'
+# all empty spaces must be '.'
+# all lines must end with '-'
+#
+# E.g.:
+# . . 4|. . .|5 . .-
+
+. . .|. 3 .|. . .-
+9 1 .|. . .|5 . .-
+. 5 6|. . .|. 8 9-
+#----+-----+------
+. . 1|8 . .|. . .-
+. 6 9|. . .|. . .-
+. . .|2 . 6|3 . 4-
+#----+-----+------
+. . 2|. . .|. . .-
+. . .|. 2 4|. . 5-
+. . .|5 . .|8 9 .-
