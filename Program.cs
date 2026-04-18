@@ -23,11 +23,9 @@ namespace Sudoku {
 					case 1:
 						// Edit
 						goto EditSudoku;
-						break;
 					case 2:
 						// New
 						goto NewSudoku;
-						break;
 					default:
 						solve(sdk);
 						break;
@@ -920,11 +918,7 @@ namespace Sudoku {
 			Task.Delay(2500).Wait();
 			Console.WriteLine("-----------------------------\n");
 
-			Console.WriteLine("Now you can put in some Sudoku you want to solve: ");
-			SudokuGrid testGrid3 = new SudokuGrid(9);
-			testGrid3.PrintEmptyGrid();
-			testGrid3.Solve(false);
-			testGrid3.PrintAllSolutions();
+			Console.WriteLine("use --new to create your own sudoku and solve it.");
 
 			Console.WriteLine();
 			Console.Write("Thats it for now, press any key to continue: ");
