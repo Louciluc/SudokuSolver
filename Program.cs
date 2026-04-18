@@ -1,20 +1,65 @@
-﻿using MyLibrary;
-using Sudoku;
-using System.IO;
-
-TestProgram test = new TestProgram();
-test.Main();
+﻿using System.IO;
 
 namespace Sudoku {
 	class TestProgram {
-		public async void Main()
+		public static void Main(string[] args)
 		{
-			SudokuGrid grid = new(16);
-			SudokuGrid sgrid = new(9);
-			SudokuGrid.TestFunction();
-			SudokuGrid newgrid = new(SudokuGrid.TestGrid2);
-			newgrid.Solve(true);
-			newgrid.PrintAllSolutions();
+			List<string> lArgs = args.ToList();
+			if (lArgs.Contains("--test")) SudokuGrid.TestFunction();
+			else if(lArgs.Contains("--new")) {
+				NewSudoku:
+				SudokuGrid sdk = new(9);
+
+				EditSudoku:
+				sdk.ChangeGridInTerminal();
+				SudokuGrid.StaticPrintGrid(sdk);
+
+				int answer = GetUserInput(["Solve sudoku", "Edit sudoku", "Start fresh"]);
+				switch (answer) {
+					case 0:
+						// Solve sdk
+						solve(sdk);
+						break;
+					case 1:
+						// Edit
+						goto EditSudoku;
+						break;
+					case 2:
+						// New
+						goto NewSudoku;
+						break;
+					default:
+						solve(sdk);
+						break;
+				}
+
+			}
+
+		}
+
+		private static void solve(SudokuGrid sdk){
+			sdk.Solve();
+			Console.WriteLine("");
+			sdk.PrintAllSolutions();
+		}
+
+		private static int GetUserInput(string[] options){
+			int numLength = options.Length.ToString().Length;
+			for (int i = 0; i < options.Length; i++){
+				Console.Write(i);
+				Console.Write(new string(' ', numLength-i.ToString().Length + 2));
+				Console.WriteLine(options[i]);
+			}
+			Console.WriteLine("Choose one option above! ");
+			int answer;
+			while(true) {
+				string sAnswer = Console.ReadLine();
+				if (Int32.TryParse(sAnswer, out answer)){
+					return answer;
+				}
+				else if (sAnswer == "") return 0;
+				else Console.WriteLine("Your input was incorrect!");
+			}
 		}
 	}
 
@@ -87,10 +132,11 @@ namespace Sudoku {
 				}
 			}
 
-			Sort.MergeSort(possibleMatches);
+			possibleMatches.Sort();
 			if (possibleMatches.Count == 0) throw new Exception("No BoxSize Found!");
 			return possibleMatches[0].Value;
 		}
+
 		private struct BoxSizeComparer : IComparable<BoxSizeComparer> {
 			public (int, int) Value;
 			public BoxSizeComparer(int x, int y) { Value = (x, y); }
@@ -99,7 +145,6 @@ namespace Sudoku {
 				return Math.Abs(this.Value.Item1 - this.Value.Item2).CompareTo(Math.Abs(other.Value.Item1 - other.Value.Item2));
 			}
 		}
-
 
 		private static void loopAll(AllAction? actionAll, XAction? actionX, int xLimit, int yLimit, SudokuGrid sudokuGrid, params object[] parameters)
 		{
@@ -112,163 +157,29 @@ namespace Sudoku {
 				actionX?.Invoke(x, sudokuGrid, parameters);
 			}
 		}
+
 		public void ChangeGridInTerminal()
 		{
 			// Add someway of Terminal input here
-			throw new NotImplementedException("There is an implementation, but it doesnt work, unfortunately. :-(");
+			Console.Clear();
 
-			int lineAtStart = Console.CursorTop;
-			int?[,] currentGrid = new int?[TotalSize, TotalSize];
-			for (int x = 0; x < TotalSize; x++) for (int y = 0; y < TotalSize; y++) currentGrid[x, y] = Grid[x, y].Value;
+			var position = (1,1);
+			var backup = CopyGrid();
+
 			ConsoleKeyInfo input;
-			(int, int) position = (1, 1);
-			// 4, because its four lines of instructions below the grid
-			int numberOfLinesToClear = TotalSize + BoxCount.Item2 + 4;
+
 			do
 			{
-				// reset terminal
-				//for (int i = lineAtStart; i < lineAtStart + numberOfLinesToClear; i++) { Console.WriteLine(); ClearTerminalLine(i + lineAtStart); }
+				RenderGridUI(position);
 
-				// make graphics, like the current grid and instructions
-				Console.CursorTop = lineAtStart;
-				Console.CursorLeft = 0;
-				// some spaces for overwriting old stuff
-				Console.WriteLine($"Your current position in the Grid is {position}                 ");
-				int heightAtGridStart = Console.CursorTop;
-				PrintEmptyGrid();
-				Console.WriteLine("- Use arrow keys to move around\n" +
-					"- Use numbers to enter a number\n" +
-					"- enter: save and exit\n" +
-					"- c to cancel");
-
-				// set cursor to position the user wants to edit and read input
-				(int, int) terminalPos = GridPosToTerminalPos(position);
-				(int, int) maxTerminalPos = GridPosToTerminalPos((TotalSize, TotalSize));
-				Console.CursorTop = terminalPos.Item1 + heightAtGridStart;
-				Console.CursorLeft = terminalPos.Item2;
 				input = Console.ReadKey();
 
-				// evaluate input
-				// x and y are 0 based index, position is not, x and y are for the position in int? [,] Grid
-				int x = position.Item1 - 1;
-				int y = position.Item2 - 1;
-				switch (input.Key)
-				{
-					case ConsoleKey.UpArrow:
-						if (position.Item1 > 1) position.Item1--;
-						else position.Item1 = TotalSize;
-						break;
-					case ConsoleKey.DownArrow:
-						if (position.Item1 < TotalSize) position.Item1++;
-						else position.Item1 = 1;
-						break;
-					case ConsoleKey.LeftArrow:
-						if (position.Item2 > 1) position.Item2--;
-						else position.Item2 = TotalSize;
-						break;
-					case ConsoleKey.RightArrow:
-						if (position.Item2 < TotalSize) position.Item2++;
-						else position.Item2 = 1;
-						break;
-					case ConsoleKey.C:
-						// cancel
-						// see i and j as x and y, they were just set before the switch
-						for (int i = 0; i < TotalSize; i++) for(int j = 0; j < TotalSize; j++)
-						{
-							Grid[i, j].Value = currentGrid[i, j];
-							if (currentGrid[i, j] != null) Grid[i, j].IsDefRight = true;
-							else Grid[i, j].IsDefRight = false;
-						}
-						return;
-					// a number or dot/space was pressed, or nothing relevant
-					// !!!Dont look at this unless you really need to!!!
-					default:
-						// try to parse number
-						if (int.TryParse(input.KeyChar.ToString(), out int number))
-						{
-							
+				if (!HandleInput(input, ref position, backup))
+					break;
 
-							// inputs can have multiple digits
-							// so check if number is in range, it always should be in range when having two digits
-							// I'm going with the way of expecting the second (or more) digit(s) to be given right after the first one
-							if(number >= 1 && number <= TotalSize)
-							{
-								// first digit is in range
-								// Now check are more than one digit needed
-								if (TotalSize.ToString().Length > 1)
-								{
-									// Two or more digits needed, most of the times
-									string numberString = input.KeyChar.ToString();
-
-									// save current terminal position, SetCursorPosition() expects (left, top)
-									(int, int) tempTerminalPosition = Console.GetCursorPosition();
-
-									// give some input instructions on the previous line
-									Console.SetCursorPosition(0, tempTerminalPosition.Item2 - 1);
-									Console.Write($"Please enter the next {TotalSize.ToString().Length -1} digit(s) for the number, you can exit with q, space or enter: ");
-
-									// index i is 0 based
-									// for every digit needed, read a new input
-									for (int i = 1; i < TotalSize.ToString().Length; i++)
-									{
-										// (left, top), +i to visualize the input position
-										Console.SetCursorPosition(tempTerminalPosition.Item1 + i, tempTerminalPosition.Item2);
-										ConsoleKeyInfo nextDigitInput = Console.ReadKey();
-
-										if (int.TryParse(nextDigitInput.KeyChar.ToString(), out int nextDigit))
-										{
-											numberString += nextDigit.ToString();
-										}
-										else
-										{
-											if(nextDigitInput.Key == ConsoleKey.Q || nextDigitInput.Key == ConsoleKey.Enter || nextDigitInput.Key == ConsoleKey.Spacebar) break;
-											else
-											{
-												// invalid input, give another chance for this digit
-												Console.SetCursorPosition(0, tempTerminalPosition.Item2 + 1);
-												Console.WriteLine($"Invalid input '{nextDigitInput.KeyChar}' for digit {i + 1}, please try again. Press 'Q', ' ' or enter to cancel entering the number.");
-												i--;
-											}
-										}
-									}
-
-									// try to parse the full number
-									// this should always be a wanted number, since the exit was already offered by pressing q
-									if (int.TryParse(numberString, out int fullNumber))
-									{
-										// Check if full number is in range
-										if (fullNumber < 1 || fullNumber > TotalSize)
-										{
-											// invalid number
-											Console.SetCursorPosition(0, tempTerminalPosition.Item2 +1);
-											Console.WriteLine($"The number {fullNumber} is not in the range of 1 to {TotalSize}, press any key to continue.");
-											Console.ReadKey();
-											break;
-										}
-										// set the number
-										Grid[x, y].Value = fullNumber;
-										Grid[x, y].IsDefRight = true;
-									}
-								}
-								else
-								{
-									// only one digit needed
-									Grid[x, y].Value = number;
-									Grid[x, y].IsDefRight = true;
-								}
-							}
-						}
-						// if its a dot or a space, remove the number
-						else if (input.KeyChar == '.' || input.KeyChar == ' ')
-						{
-							Grid[x, y].Value = null;
-							Grid[x, y].IsDefRight = false;
-						}
-
-						break;
-				}
 			} while (input.Key != ConsoleKey.Enter);
-			Console.SetCursorPosition(0, numberOfLinesToClear + 2 + lineAtStart);
+
+			Console.Clear();
 		}
 		private void ClearTerminalLine(int lineNumber)
 		{
@@ -277,6 +188,160 @@ namespace Sudoku {
 			Console.Write(new string(' ', Console.BufferWidth));
 			Console.SetCursorPosition(currentPos.Item1, currentPos.Item2);
 		}
+		private void RenderGridUI((int, int) position) {
+
+			Console.Clear();
+			Console.WriteLine($"Your current position in the Grid is {position}");
+			int heightAtGridStart = Console.CursorTop;
+			PrintEmptyGrid();
+			Console.WriteLine("- Use arrow keys to move around\n" +
+				"- Use numbers to enter a number\n" +
+				"- \' \', \'.\', \'d\', \'x\' to delete a cell\n" +
+				"- enter: save and exit\n" +
+				"- c to cancel");
+
+			// set cursor to position the user wants to edit and read input
+			(int, int) terminalPos = GridPosToTerminalPos(position);
+			(int, int) maxTerminalPos = GridPosToTerminalPos((TotalSize, TotalSize));
+			Console.CursorTop = terminalPos.Item1 + heightAtGridStart;
+			Console.CursorLeft = terminalPos.Item2;
+		}
+
+		private bool HandleInput(ConsoleKeyInfo input, ref (int, int) position, int?[,] backupGrid) {
+			// x and y are 0 based index, position is not, x and y are for the position in int? [,] Grid
+			int x = position.Item1 - 1;
+			int y = position.Item2 - 1;
+			switch (input.Key)
+			{
+				// Move Position:
+				case ConsoleKey.UpArrow:
+					if (position.Item1 > 1) position.Item1--;
+					else position.Item1 = TotalSize;
+					return true;
+				case ConsoleKey.DownArrow:
+					if (position.Item1 < TotalSize) position.Item1++;
+					else position.Item1 = 1;
+					return true;
+				case ConsoleKey.LeftArrow:
+					if (position.Item2 > 1) position.Item2--;
+					else position.Item2 = TotalSize;
+					return true;
+				case ConsoleKey.RightArrow:
+					if (position.Item2 < TotalSize) position.Item2++;
+					else position.Item2 = 1;
+					return true;
+				case ConsoleKey.C:
+					// cancel
+					// see i and j as x and y, they were just set before the switch
+					for (int i = 0; i < TotalSize; i++) for(int j = 0; j < TotalSize; j++)
+					{
+						Grid[i, j].Value = backupGrid[i, j];
+						if (backupGrid[i, j] != null) Grid[i, j].IsDefRight = true;
+						else Grid[i, j].IsDefRight = false;
+					}
+					return true;
+				// a number or dot/space was pressed
+				default:
+					if(TryReadNumberInput(input, out int? num)){
+						Grid[x,y].Value = num;
+						if (num == null) Grid[x,y].IsDefRight = false;
+						else Grid[x,y].IsDefRight = true;
+					}
+					return true;
+			}
+			return false;
+
+		}
+		private bool TryReadNumberInput(ConsoleKeyInfo firstKey, out int? outNumber) 
+		{
+			// deleting the colls Value is handled at the end of this function.
+			//
+			//
+			// try to parse number
+			if (int.TryParse(firstKey.KeyChar.ToString(), out int number))
+			{
+				// inputs can have multiple digits
+				// so check if number is in range, it always should be in range when having two digits
+				// I'm going with the way of expecting the second (or more) digit(s) to be given right after the first one
+				if(number >= 1 && number <= TotalSize)
+				{
+					// first digit is in range
+					// Now check are more than one digit needed
+					if (TotalSize.ToString().Length > 1)
+					{
+						// Two or more digits needed, most of the times
+						string numberString = firstKey.KeyChar.ToString();
+
+						// save current terminal position, SetCursorPosition() expects (left, top)
+						(int, int) tempTerminalPosition = Console.GetCursorPosition();
+
+						// give some input instructions on the previous line
+						Console.SetCursorPosition(0, tempTerminalPosition.Item2 - 1);
+						Console.Write($"Please enter the next {TotalSize.ToString().Length -1} digit(s) for the number, you can exit with q, space or enter: ");
+
+						// index i is 0 based
+						// for every digit needed, read a new input
+						for (int i = 1; i < TotalSize.ToString().Length; i++)
+						{
+							// (left, top), +i to visualize the input position
+							Console.SetCursorPosition(tempTerminalPosition.Item1 + i, tempTerminalPosition.Item2);
+							ConsoleKeyInfo nextDigitInput = Console.ReadKey();
+
+							if (int.TryParse(nextDigitInput.KeyChar.ToString(), out int nextDigit))
+							{
+								numberString += nextDigit.ToString();
+							}
+							else
+							{
+								if(nextDigitInput.Key == ConsoleKey.Q || nextDigitInput.Key == ConsoleKey.Enter || nextDigitInput.Key == ConsoleKey.Spacebar) break;
+								else
+								{
+									// invalid input, give another chance for this digit
+									Console.SetCursorPosition(0, tempTerminalPosition.Item2 + 1);
+									Console.WriteLine($"Invalid input '{nextDigitInput.KeyChar}' for digit {i + 1}, please try again. Press 'Q', ' ' or enter to cancel entering the number.");
+									i--;
+								}
+							}
+						}
+
+						// try to parse the full number
+						// this should always be a wanted number, since the exit was already offered by pressing q
+						if (int.TryParse(numberString, out int fullNumber))
+						{
+							// Check if full number is in range
+							if (fullNumber < 1 || fullNumber > TotalSize)
+							{
+								// invalid number
+								Console.SetCursorPosition(0, tempTerminalPosition.Item2 +1);
+								Console.WriteLine($"The number {fullNumber} is not in the range of 1 to {TotalSize}, press any key to continue.");
+								Console.ReadKey();
+								outNumber = null;
+								return true;
+							}
+							outNumber = fullNumber;
+							return true;
+						}
+					}
+					else
+					{
+						// only one digit needed
+						outNumber = number;
+						return true;
+					}
+				}
+			}
+
+			// if its a dot or a space, remove the number
+			else if (firstKey.KeyChar == '.' || firstKey.KeyChar == ' ' || firstKey.KeyChar == 'd' || firstKey.KeyChar == 'x')
+			{
+				outNumber = null;
+				return true;
+			}
+
+			outNumber = null;
+			return false;
+		}
+
 		private (int, int) GridPosToTerminalPos ((int, int) gridPosition)
 		{
 			int characterCountOfOneCell = TotalSize.ToString().Length;
@@ -364,6 +429,16 @@ namespace Sudoku {
 			// Remove all null lines and empty lines
 			allLines.ConvertAll(new Converter<string?, string>((string? line) => (string)(line ?? "")));
 			allLines.RemoveAll(line => line == "");
+		}
+
+		private int?[,] CopyGrid()
+		{
+			var copy = new int?[TotalSize,TotalSize];
+			for (int x = 0; x < TotalSize; x++)
+				for (int y = 0; y < TotalSize; y++)
+					copy[x,y] = Grid[x,y].Value;
+
+			return copy;
 		}
 
 		public static void StaticPrintGrid(SudokuGrid _grid)
@@ -686,7 +761,7 @@ namespace Sudoku {
 				}
 			};
 
-			// actually do the lambda for all cells
+			// do the lambda for all cells
 			loopAll(findOptions, null, TotalSize, TotalSize, this, new object[1]);
 
 			//return allOptionsOfAllCells;
@@ -704,42 +779,35 @@ namespace Sudoku {
 
 			List<SudokuCell> emptyCells = [];
 
-			// Get all cells that have options left by using a loop
-			foreach (SudokuCell item in Grid) if (item.OptionsLeft.Count != 0) emptyCells.Add(item);
+			// Get all cells that are empty by using a loop
+			loopAll((int x, int y, SudokuGrid grid, params object[] param) => { if(grid.Grid[x,y].Value == null) emptyCells.Add(grid.Grid[x,y]); },
+					null, TotalSize, TotalSize, this, new object[1]);
 
 			printEmptyCellsStats?.Invoke(this, emptyCells);
-			// if there is no item in the List it could be finished or a unsolvable
-			// if the following statement is true, the end of this branch is near
+
+			// if the following statement is true, the end of this branch is here
 			if (emptyCells.Count == 0)
 			{
-				// Its solved if all Cells have a Value
+				int[,] thisSolution = new int[TotalSize, TotalSize];
 
-				if (Convert2DArrayTo1D(Grid).All(a => a.Value != null))
+				AllAction makeArrayOfValues = (int x, int y, SudokuGrid grid, params object[] parameters) =>
 				{
-					int[,] thisSolution = new int[TotalSize, TotalSize];
+					// Since all Values should be set here, no null should occur
+					thisSolution[x, y] = (int)grid.Grid[x, y].Value;
+				};
+				loopAll(makeArrayOfValues, null, TotalSize, TotalSize, this, []);
 
-					AllAction makeArrayOfValues = (int x, int y, SudokuGrid grid, params object[] parameters) =>
-					{
-						// Since all Values should be set here, no null should occur
-						thisSolution[x, y] = (int)grid.Grid[x, y].Value;
-					};
-					loopAll(makeArrayOfValues, null, TotalSize, TotalSize, this, []);
-
-					possibleSolutionsSaved.Add(thisSolution);
-					return true;
-				}
-
-				// else there are cells Empty, without options left. 
-				// So the sudoku isnt solvable at this point
-				return false;
-
+				// thisSolution is only needed here, so technically its a clone already
+				possibleSolutionsSaved.Add(thisSolution);
+				return true;
+			
 			}
 			// If this following code runs, the end of a branch isnt found yet, so there has to be searched for more
 
 			// Sort empty cells by the amount of options left
 			// The lowest options left should then be at the start of the list
-			// There shouldnt be any Count 0 because of the loop before
-			Sort.MergeSort(emptyCells, (a, b) => a.OptionsLeft.Count.CompareTo(b.OptionsLeft.Count));
+			emptyCells.Sort((a,b) => a.OptionsLeft.Count.CompareTo(b.OptionsLeft.Count));
+			if (emptyCells[0].OptionsLeft.Count == 0) return false;
 
 			SudokuCell chosenCell = emptyCells[0];
 
@@ -748,6 +816,7 @@ namespace Sudoku {
 			// When wanting all Solutions of this Sudoku, the following boolean is needed
 			bool atLeastOneWorked = false;
 
+			int? oldValue = chosenCell.Value;
 			// Try all Numbers, the cell has as options
 			foreach (int tryNumber in optionsToTry)
 			{
@@ -773,7 +842,7 @@ namespace Sudoku {
 			}
 			afterAllOptionsTried?.Invoke(this, atLeastOneWorked, chosenCell);
 
-			chosenCell.Value = null;
+			chosenCell.Value = oldValue;
 
 			// When multipleSolutions are wanted, there might be some correct solved Sudoku
 			// return this information
@@ -800,7 +869,7 @@ namespace Sudoku {
 			Action<SudokuGrid, List<SudokuCell>>? printEmptyCellsStats = printLogs ? ((SudokuGrid grid, List<SudokuCell> a) => Console.WriteLine("Empty cells at the moment: " + a.Count.ToString())) : null;
 			Action<SudokuGrid, SudokuCell, List<int>, int>? beforeRecursiveSolve = printLogs ? ((SudokuGrid grid, SudokuCell chosenCell, List<int> optionsToTry, int tryNumber) =>
 			{
-				Console.WriteLine($"Trying {tryNumber} for cell {chosenCell.Position} with options left: {string.Join(", ", optionsToTry)}");
+				Console.WriteLine($"Trying {tryNumber} for cell {chosenCell.Position} with options left: [{string.Join(", ", optionsToTry)}]");
 				StaticPrintGrid(this);
 			}) : null;
 			Action<SudokuGrid, bool, bool, SudokuCell, List<int>, int>? afterRecursiveSolve = printLogs ? ((SudokuGrid grid, bool worked, bool atLeastOneWorked, SudokuCell chosenCell, List<int> optionsToTry, int tryNumber) => {
@@ -818,9 +887,13 @@ namespace Sudoku {
 				}
 			}) : null;
 
-			Console.WriteLine("Solving the sudoku has startet, this might take a while");
+			if (printLogs) Console.WriteLine("Solving the sudoku has startet, this might take a while");
 			bool IsSolved = RecursiveSolve(true, printEmptyCellsStats, beforeRecursiveSolve, afterRecursiveSolve, afterAllOptionsTried);
-			Console.WriteLine($"Solving succeeded: {IsSolved}");
+			if (printLogs) {
+				Console.WriteLine("------------------------");
+				Console.WriteLine($"Solving succeeded: {IsSolved}");
+				Console.WriteLine("Print Solutions with \'PrintAllSolutions()\'");
+			}
 			return IsSolved;
 		}
 		

@@ -7,15 +7,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MyLibrary" Version="1.0.0" />
-    <PackageReference Include="OpenTK" Version="5.0.0-pre.15" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="MyLibrary">
-      <HintPath>..\Mylibrary\bin\Debug\Mylibrary.exe</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
