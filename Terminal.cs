@@ -3,6 +3,84 @@ using Sudoku;
 
 namespace Sudoku {
 	public partial class SudokuGrid {
+
+
+		private (int, int) GridPosToTerminalPos ((int, int) gridPosition)
+		{
+			int characterCountOfOneCell = TotalSize.ToString().Length;
+
+			// change to 0 based index
+			gridPosition.Item1 --;
+			gridPosition.Item2 --;
+
+			(int, int) terminalPos;
+			// vertical position is the gridposition plus the spaces for the horizontal lines coming from the boxes
+			terminalPos.Item1 = gridPosition.Item1 + (gridPosition.Item1 / BoxSize.Item1);
+			// horizontal position is the character count +1 (for spaces and |)
+			// I think when there is | there is no space, so +1 is enough
+			terminalPos.Item2 = gridPosition.Item2 * (characterCountOfOneCell + 1); //+ (gridPosition.Item1 / BoxSize.Item1);
+
+			return terminalPos;
+		}
+
+		public static void StaticPrintGrid(SudokuGrid _grid)
+		{
+			AllAction printhorizontallines = static (int x, int y, SudokuGrid sudokuGrid, params object[] parameters) =>
+			{
+				// print number with colour if its a given value, print in gray if its empty
+				if (sudokuGrid.Grid[x, y].IsDefRight) Console.ForegroundColor = ConsoleColor.DarkCyan;
+				else if(sudokuGrid.Grid[x, y].Value == null) Console.ForegroundColor = ConsoleColor.DarkGray;
+				// print the value, the ToString method of SudokuCell is overwritten for this.
+				Console.Write(sudokuGrid.Grid[x, y]);
+
+				// add spaces to align numbers, it was originally with an if statement chcking if the lengths are different, but this way is cleaner and should have a similar performance
+				for (int i = 0; i < sudokuGrid.TotalSize.ToString().Length - sudokuGrid.Grid[x, y].ToString().Length; i++)
+				{
+					Console.Write(' ');
+				}
+
+				//reset colour
+				Console.ForegroundColor = ConsoleColor.White;
+
+				// make lines for visualization
+				if ((y + 1) % sudokuGrid.BoxCount.Item1 == 0 && y + 1 != sudokuGrid.TotalSize)
+				{
+					Console.Write('|');
+				}
+				else
+				{
+					Console.Write(' ');
+				}
+			};
+			XAction printhorizontalspacing = static (int x, SudokuGrid sudokuGrid, params object[] parameters) =>
+			{
+				Console.WriteLine();
+				if ((x + 1) % sudokuGrid.BoxCount.Item2 == 0 && x + 1 != sudokuGrid.TotalSize)
+				{
+					// for each
+					for (int y = 0; y < sudokuGrid.BoxCount.Item2; y++)
+					{
+						// j is boxWherePosIsIn of row
+						for (int i = 0; i < sudokuGrid.BoxSize.Item2; i++)
+						{
+							// i is position in boxWherePosIsIn
+
+							// print '-' for each position where a number would be
+							// for that the string length of the biggest number is taken and that many '-' are printed
+							for (int a = 0; a < sudokuGrid.TotalSize.ToString().Length; a++) Console.Write('-');
+
+							// print the '+' if its the end of a box, its also where the vertical lines cross the horizontal lines
+							if ((i + 1) % sudokuGrid.BoxSize.Item2 == 0 && y * sudokuGrid.BoxSize.Item2 + i + 1 != sudokuGrid.TotalSize) Console.Write('+');
+							else Console.Write(' ');
+						}
+					}
+					Console.WriteLine();
+				}
+			};
+
+			loopAll(printhorizontallines, printhorizontalspacing, _grid.TotalSize, _grid.TotalSize, _grid, []);
+		}
+
 		public void PrintEmptyGrid()
 		{
 			int?[,] gridOnlyGivenValues = new int?[TotalSize, TotalSize];

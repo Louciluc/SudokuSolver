@@ -18,12 +18,12 @@ namespace Sudoku {
 
 			List<string> lArgs = args.ToList();
 			if (lArgs.Contains("--test")) SudokuGrid.TestFunction();
-			if(lArgs.Contains("--new") || lArgs.Count == 0) NewSudoku(lArgs);
-			if(lArgs.Contains("--file")) FromFile(lArgs);
+			if(lArgs.Contains("--new")) NewSudoku(lArgs);
+			if(lArgs.Contains("--filetxt") || lArgs.Count == 0) FromFile(lArgs);
 		} 
 
 		private static void FromFile(List<string> args){
-			int indx = args.IndexOf("--file");
+			int indx = args.IndexOf("--filetxt");
 			string path = "";
 			try {
 				path = args[indx+1];

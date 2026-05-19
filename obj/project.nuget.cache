@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "+nTjCyfwWYw=",
+  "dgSpecHash": "4ASJkxgcGyI=",
   "success": true,
   "projectFilePath": "/home/lucas/Programmieren/csharp/SudokuSolver/SudokuSolver.csproj",
   "expectedPackageFiles": [
-    "/home/lucas/.nuget/packages/microsoft.netcore.app.ref/8.0.26/microsoft.netcore.app.ref.8.0.26.nupkg.sha512",
-    "/home/lucas/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.26/microsoft.aspnetcore.app.ref.8.0.26.nupkg.sha512",
-    "/home/lucas/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.26/microsoft.netcore.app.host.linux-x64.8.0.26.nupkg.sha512"
+    "/home/lucas/.nuget/packages/microsoft.netcore.app.ref/8.0.27/microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
+    "/home/lucas/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.27/microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512",
+    "/home/lucas/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.27/microsoft.netcore.app.host.linux-x64.8.0.27.nupkg.sha512"
   ],
   "logs": []
 }

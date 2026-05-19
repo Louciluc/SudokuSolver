@@ -64,8 +64,7 @@ namespace Sudoku {
 			Grid = new SudokuCell[sudokuSize,sudokuSize];
 
 			int currentIndex = 0;
-			// x and y are reversed because its necessary to first iterate horizontally
-			for (int y = 0; y < sudokuSize; y++) for (int x = 0; x < sudokuSize; x++) {
+			for (int x = 0; x < sudokuSize; x++) for (int y = 0; y < sudokuSize; y++) {
 				Grid[x,y] = new SudokuCell(OneDimCells[currentIndex], (x,y), OneDimCells[currentIndex] != null);
 				currentIndex++;
 			}
@@ -90,7 +89,7 @@ namespace Sudoku {
 						// The next character is also a number
 						allDigits += (nextDig-48).ToString();
 					}
-				} while (isDig);
+				} while (IsNumber(sr.Peek()));
 
 				foundNum = Int32.Parse(allDigits);
 				return true;
